@@ -1,0 +1,30 @@
+services:
+  plex-db-node:
+    image: ghcr.io/stevezau/plex-marker-agent:1.2.0
+    container_name: mpg-plex-db-node
+    user: 1000:1000
+    network_mode: host
+    environment:
+      NODE_KEY: ${NODE_KEY}
+      NODE_NAME: plex-db-myplex
+      PLEX_CONFIG_DIR: /plex/Library/Application Support/Plex Media Server
+      PUID: '1000'
+      PGID: '1000'
+      TZ: America/Chicago
+    volumes:
+    - _var_lib_docker_volumes_myplex_swarm_config__data:/plex
+    - _var_lib_docker_volumes_mpg-plex-db-node_plex-db-node-config__data:/config
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - wget -qO- http://127.0.0.1:9494/v1/ping >/dev/null || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+volumes:
+  _var_lib_docker_volumes_myplex_swarm_config__data:
+    name: /var/lib/docker/volumes/myplex_swarm_config/_data
+  _var_lib_docker_volumes_mpg-plex-db-node_plex-db-node-config__data:
+    name: /var/lib/docker/volumes/mpg-plex-db-node_plex-db-node-config/_data
